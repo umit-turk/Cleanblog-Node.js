@@ -45,6 +45,16 @@ app.get('/about',(req, res) => {
     res.render('about');
 })
 
+//index.ejs deki a tagından id'yi yakalamak için ':id' yazdık.
+app.get('/posts/:id', async (req, res) => {
+    //id yardımı ile hangi post olduğunu bulacağız
+    const post = await Post.findById(req.params.id)
+    //bulduktan sonra ilgili templete yönlendir.
+    res.render('post', {
+        post,
+    })
+} )
+
 app.get('/add',(req, res) => {
     res.render('add_post');
 })
