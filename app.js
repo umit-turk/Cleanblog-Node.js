@@ -1,8 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const methodOverride = require('method-override');
 const ejs = require('ejs');
-const path = require('path');
-const Post = require('./models/Post');
+const postController = require('./controllers/postController');
+const pageController = require('./controllers/pageController');
 
 //express sayesinde çok kolaylıkla http metotlarını kullanabiliriz.
 const app = express()
@@ -13,60 +14,32 @@ mongoose bir odm bizim schemalar içerisinde oluşturduğumuz veri nesnelerini v
 dökümanlara dönüştürüyor
 */
 //connect DB
-mongoose.connect('mongodb://localhost/cleanblog-test-db',{
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
+mongoose.connect('mongodb://localhost/cleanblog-test-db');
 
-/* expresse diyoruz ki biz templete engine olarak ejs kullanacağız
-ejs bizim klasör yapısındaki views klasörünün içerisine bakar
-*/
 //TEMPLATE ENGINE
 app.set('view engine','ejs');
 
 //MIDDLEWARES
 app.use(express.static('public'))
-
-/* body parser modulünü express içerisinde halledebiliyoruz  */
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
+app.use(methodOverride('_method', {
+    methods:['POST', 'GET']
+}));
 
 //ROUTES
-app.get('/', async (req, res) => {
-    //postları yakala
-    const posts = await Post.find({})
-    //yakaladığın postları templete gonder
-    res.render("index", {
-        posts,
-    });
-});
-
-app.get('/about',(req, res) => {
-    res.render('about');
-})
-
+app.get('/', postController.getAllPosts);
 //index.ejs deki a tagından id'yi yakalamak için ':id' yazdık.
-app.get('/posts/:id', async (req, res) => {
-    //id yardımı ile hangi post olduğunu bulacağız
-    const post = await Post.findById(req.params.id)
-    //bulduktan sonra ilgili templete yönlendir.
-    res.render('post', {
-        post,
-    })
-} )
-
-app.get('/add',(req, res) => {
-    res.render('add_post');
-})
-
+app.get('/posts/:id', postController.getPost );
 //add_post.ejs dosyasının içerisindeki form etiketindeki action attributesini yakalıyoruz.
-app.post('/posts', async (req, res) => {
-/* 
-    ilgili post modeline yönlendir ve bu post modeli bunu alacak ve veri tabanına gönderecek.
-*/
-    await Post.create(req.body);
-    res.redirect('/');
-})
+app.post('/posts', postController.createPost);
+app.put('/posts/:id', postController.updatePost);
+app.delete('/posts/:id', postController.deletePost);
+
+app.get('/about', pageController.getAboutPage);
+app.get('/add', pageController.getAddPage);
+app.get('/posts/edit/:id', pageController.getEditPage);
+
 
 const port = 5000;
 
