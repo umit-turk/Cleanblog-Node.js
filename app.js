@@ -14,7 +14,11 @@ mongoose bir odm bizim schemalar içerisinde oluşturduğumuz veri nesnelerini v
 dökümanlara dönüştürüyor
 */
 //connect DB
-mongoose.connect('mongodb://localhost/cleanblog-test-db');
+mongoose.connect('mongodb+srv://umit:ujQwsUlQTywLUSGt@cluster0.xozyj.mongodb.net/clean-app16?retryWrites=true&w=majority').then(() => {
+    console.log('DB CONNECTED');
+}).catch((err) => {
+    console.log(err);
+})
 
 //TEMPLATE ENGINE
 app.set('view engine','ejs');
@@ -41,7 +45,7 @@ app.get('/add', pageController.getAddPage);
 app.get('/posts/edit/:id', pageController.getEditPage);
 
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
     console.log(`server ${port} unda başlatıldı`);
